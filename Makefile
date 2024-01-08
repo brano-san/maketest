@@ -1,31 +1,39 @@
 # Names
 PROJECT_NAME = maketest
-TARGET = main
 
 # Compiler and flags
 CXX = g++
-CXXFLAGS = -Wall -O2
+CXXFLAGS = -O2 -MMD
 LDFLAGS = -pthread
 
 # Files
-FILES = $(shell find -name '*.cpp')
-HEADERS = $(shell find -name '*.h')
-OBJECTS = $(patsubst %.cpp, %.o, $(FILES))
+OBJ_PATH = ./tmp/
+SOURCES = $(shell find -name '*.cpp')
+OBJECTS = $(patsubst %.cpp, %.o, $(SOURCES))
+PATH_TO_OBJ = $(addprefix $(OBJ_PATH), $(notdir $(OBJECTS)))
+DEPS = ${OBJECTS:.o=.d}
 
 # Define targets
-.PHONY: all clean
+.PHONY: all, clean, cleand, cleanall
 
-all: $(OBJECTS) $(TARGET) clean
+all: $(PROJECT_NAME)
 
-$(TARGET): $(OBJECTS) $(HEADERS)
-	$(CXX) $(LDFLAGS) $(OBJECTS) -o $@
+$(PROJECT_NAME): $(OBJECTS)
+	$(CXX) $(LDFLAGS) $(PATH_TO_OBJ) -o $(PROJECT_NAME)
 
 %.o: %.cpp
-	$(CXX) $(CXXFLAGS) -c $^ -o $@
+	$(CXX) $(CXXFLAGS) -c $< -o $(OBJ_PATH)$(notdir $@)
 
 # Clean
 clean:
 	rm -rf $(shell find -name '*.o')
 
-cleanall: clean
-	rm -rf $(TARGET) 
+cleand: clean
+	rm -rf $(shell find -name '*.d')
+
+cleanall: cleand
+	rm -f $(PROJECT_NAME)
+	rm -f $(shell find -name '*.out')
+	rm -f $(shell find -name '*.h.gch')
+
+sinclude $(DEPS)

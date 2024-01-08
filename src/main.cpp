@@ -7,6 +7,6 @@ using namespace std;
 int main()
 {
     cout << foo(2048) << endl;
-    print();
+    print1();
     return 0;
 }
